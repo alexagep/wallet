@@ -1,12 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { QueryFailedExceptionFilter } from './common/uniqueError';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { join } from 'path';
+import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.connectMicroservice({
+    transport: Transport.GRPC,
+    options: {
+      package: ['wallets'],
+      protoPath: [join(__dirname, 'wallets/proto/wallets.proto')],
+      url: `${process.env.GRPC_URL}`,
+    },
+  });
 
   const configService = app.get(ConfigService);
 
@@ -14,8 +25,6 @@ async function bootstrap() {
     .setTitle('upload + download service')
     .setVersion('1.0')
     .build();
-
-  app.useGlobalFilters(new QueryFailedExceptionFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -34,6 +43,5 @@ async function bootstrap() {
   await app.listen(port, (): void => {
     console.log('server is running on port', port);
   });
-
 }
 bootstrap();
