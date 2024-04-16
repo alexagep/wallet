@@ -3,5 +3,6 @@ import { TransactionRepository } from './transaction.repository';
 
 @Module({
   providers: [TransactionRepository],
+  exports: [TransactionRepository],
 })
 export class TransactionModule {}

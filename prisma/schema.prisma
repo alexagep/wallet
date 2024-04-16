@@ -1,8 +1,15 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex", "metrics"]
+  binaryTargets   = ["linux-musl", "native"]
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement())
+  timestamp BigInt
+  name      String
 }
 
 datasource db {
@@ -12,16 +19,16 @@ datasource db {
 
 model Wallet {
   id           String        @id @default(uuid())
-  user_id      String        @unique @default(uuid())
+  userId      String        @unique @default(uuid())
   balance      Int           @default(0)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @default(now())
   transactions Transaction[]
+  createdAt    DateTime      @default(dbgenerated("NOW()")) 
+  updatedAt    DateTime      @default(dbgenerated("NOW()"))
 }
 
 model Transaction {
   id        String   @id @default(uuid())
-  user_id   String   @unique @default(uuid())
+  userId   String   @unique @default(uuid())
   amount    Int
   createdAt DateTime @default(now())
   wallet    Wallet   @relation(fields: [wallet_id], references: [id], onDelete: Cascade)
@@ -34,3 +41,4 @@ model DailyTransaction {
   totalTransactions Int
   createdAt         DateTime @default(now())
 }
+

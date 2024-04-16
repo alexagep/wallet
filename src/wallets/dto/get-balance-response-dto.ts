@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, validate } from 'class-validator';
-// import { CheckWalletExist } from '../constraint/check-user-is-exist';
+
+import { IsUUID, Validate } from 'class-validator';
+import { CheckWalletExistence } from '../constraint/check-user-is-exist';
 
 export class GetBalanceRequestDto {
   @ApiProperty({
@@ -8,7 +9,7 @@ export class GetBalanceRequestDto {
     example: '123e4567-e89b-12d3-a456-426614174000',
     type: String,
   })
-  // @validate(CheckWalletExist)
   @IsUUID()
+  @Validate(CheckWalletExistence)
   user_id: string;
 }

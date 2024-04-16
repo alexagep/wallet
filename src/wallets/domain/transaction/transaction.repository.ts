@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+// import { Prisma, PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class TransactionRepository {
@@ -7,11 +8,11 @@ export class TransactionRepository {
     user_id: string,
     amount: number,
     wallet_id: string,
-    trxPrisma: any,
+    trxPrisma: Prisma.TransactionClient,
   ) {
     const wallet = await trxPrisma.transaction.create({
       data: {
-        user_id,
+        userId: user_id,
         amount,
         wallet_id,
       },
@@ -21,7 +22,11 @@ export class TransactionRepository {
     return wallet;
   }
 
-  async findMany(startOfDay: Date, endOfDay: Date, prismaTrx) {
+  async findMany(
+    startOfDay: Date,
+    endOfDay: Date,
+    prismaTrx: Prisma.TransactionClient,
+  ) {
     const transactions = await prismaTrx.transaction.findMany({
       where: {
         createdAt: {
