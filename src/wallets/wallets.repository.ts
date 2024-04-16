@@ -1,30 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from 'nestjs-prisma';
 import { GetBalanceRequestDto } from './dto/get-balance-response-dto';
 
 @Injectable()
 export class WalletsRepository {
-  constructor(private prisma: PrismaClient) {}
-
-  async userExists(userId: string): Promise<boolean> {
-    const user = await this.prisma.wallet.findUnique({
-      where: { user_id: userId },
-      select: { user_id: true },
-    });
-    return !!user;
-  }
+  constructor(private readonly db: PrismaService) {}
 
   async findOne(data: GetBalanceRequestDto) {
-    const wallet = await this.prisma.wallet.findUnique({
-      where: { user_id: data.user_id },
+    const wallet = await this.db.wallet.findUnique({
+      where: { userId: data.user_id },
     });
+
+    console.log(wallet, data.user_id);
 
     return wallet;
   }
 
-  async update(user_id: string, amount: number, prisma) {
-    const wallet = await prisma.wallet.update({
-      where: { user_id },
+  async update(
+    user_id: string,
+    amount: number,
+    trxPrisma: Prisma.TransactionClient,
+  ) {
+    const wallet = await trxPrisma.wallet.update({
+      where: { userId: user_id },
       data: { balance: { increment: amount } },
       select: { id: true, balance: true },
     });

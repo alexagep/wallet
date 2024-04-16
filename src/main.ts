@@ -3,9 +3,8 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,7 +13,7 @@ async function bootstrap() {
     transport: Transport.GRPC,
     options: {
       package: ['wallets'],
-      protoPath: [join(__dirname, 'wallets/proto/wallets.proto')],
+      protoPath: [join(__dirname, 'grpc-wallets/proto/wallets.proto')],
       url: `${process.env.GRPC_URL}`,
     },
   });

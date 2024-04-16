@@ -1,20 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
 // Dto
-import { BalanceResponseDto } from 'src/wallets/dto/get-balance-request-dto';
-import { WalletTransactionDto } from 'src/wallets/dto/wallet-transaction-request-dto';
-import { GetBalanceRequestDto } from 'src/wallets/dto/get-balance-response-dto';
-import { TransactionResponseDto } from 'src/wallets/dto/wallet-transaction-response-dto';
+import { BalanceResponseDto } from './dto/get-balance-request-dto';
+import { WalletTransactionDto } from './dto/wallet-transaction-request-dto';
+import { GetBalanceRequestDto } from './dto/get-balance-response-dto';
+import { TransactionResponseDto } from './dto/wallet-transaction-response-dto';
+// Service
+import { PrismaService } from 'nestjs-prisma';
 // utility
 import { Cron } from '@nestjs/schedule';
+// Repository
 import { WalletsRepository } from './wallets.repository';
-import { TransactionRepository } from 'src/transaction/transaction.repository';
-import { DailyTransactionRepository } from 'src/dailyTransaction/dailyTransaction.repository';
+import { TransactionRepository } from './domain/transaction/transaction.repository';
+import { DailyTransactionRepository } from './domain/dailyTransaction/dailyTransaction.repository';
 
 @Injectable()
 export class WalletsService {
   constructor(
-    private readonly prisma: PrismaClient,
+    private readonly prisma: PrismaService,
     private readonly walletsRepository: WalletsRepository,
     private readonly transactionRepository: TransactionRepository,
     private readonly dailyTransactionRepository: DailyTransactionRepository,
@@ -37,19 +39,16 @@ export class WalletsService {
   ): Promise<TransactionResponseDto> {
     const { user_id } = query,
       { amount } = body;
-    // Generate a reference ID for the transaction
+
     let transaction: { id: string };
 
-    // Start a transaction
     await this.prisma.$transaction(async (trxPrisma) => {
-      // Update the wallet balance
       const wallet = await this.walletsRepository.update(
         user_id,
         amount,
         trxPrisma,
       );
 
-      // Insert the transaction record
       transaction = await this.transactionRepository.create(
         user_id,
         amount,
@@ -58,7 +57,6 @@ export class WalletsService {
       );
     });
 
-    // Return the reference ID
     return { reference_id: transaction.id };
   }
 
@@ -85,13 +83,15 @@ export class WalletsService {
           0,
         );
 
-        transactions.map(async (transaction: { wallet_id: number; }) => {
+        transactions.map(async (transaction) => {
           await this.dailyTransactionRepository.create(
             transaction.wallet_id,
             totalTransactions,
             trxPrisma,
           );
         });
+
+        return;
       });
 
       console.log('Daily transaction total inserted successfully.');
@@ -102,4 +102,3 @@ export class WalletsService {
     }
   }
 }
-

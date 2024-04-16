@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class DailyTransactionRepository {
   async create(
+    wallet_id: string,
     totalTransactions: number,
-    transaction: { wallet_id: string },
-    trxPrisma: any,
+    trxPrisma: Prisma.TransactionClient,
   ) {
     const dailyTrx = await trxPrisma.dailyTransaction.create({
       data: {
-        wallet_id: transaction.wallet_id,
+        wallet_id,
         totalTransactions,
       },
     });

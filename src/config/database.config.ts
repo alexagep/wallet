@@ -9,7 +9,7 @@ export class PrismaConfigService implements PrismaOptionsFactory {
   createPrismaOptions(): PrismaServiceOptions | Promise<PrismaServiceOptions> {
     return {
       prismaOptions: {
-        log: [this.configService.get('log')],
+        log: ['error'],
         datasources: {
           db: {
             url: this.configService.get('DATABASE_URL'),
